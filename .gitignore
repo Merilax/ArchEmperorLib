@@ -1,0 +1,9 @@
+bin
+obj
+*.sln
+*.bat
+*.zip
+*.lscache
+.vs
+Test/
+*.csOFF
