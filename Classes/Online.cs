@@ -5,7 +5,6 @@ using Fusion;
 using Fusion.Photon.Realtime;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace ArchEmperorLib;
 
@@ -20,12 +19,12 @@ public class OnlinePatch
 			if (args.SessionProperties.ContainsKey("ArchEmperorVersion"))
 			{
 				args.SessionProperties["ArchEmperorVersion"] = MyPluginInfo.PLUGIN_VERSION;
-				args.SessionProperties["ArchEmperorManifest"] = LobbyCompatibilityRegistry.ComputeDigest();//string.Join(':', RuntimeData.GetOnlineManifests());
+				args.SessionProperties["ArchEmperorManifest"] = ModRegistry.ComputeDigest();//string.Join(':', RuntimeData.GetOnlineManifests());
 			}
 			else
 			{
 				args.SessionProperties.Add("ArchEmperorVersion", MyPluginInfo.PLUGIN_VERSION);
-				args.SessionProperties.Add("ArchEmperorManifest", LobbyCompatibilityRegistry.ComputeDigest());
+				args.SessionProperties.Add("ArchEmperorManifest", ModRegistry.ComputeDigest());
 			}
 		}
 
@@ -156,32 +155,13 @@ public class OnlinePatch
 		__instance.mainMenu.MainMenuGp.enabled = true;
 	}
 
-
 	private static bool ValidateVersion(SessionInfo sesh)
 	{
 		// Match core version. True = remove room.
 		if (!sesh.Properties.ContainsKey("ArchEmperorVersion") || sesh.Properties["ArchEmperorVersion"] != MyPluginInfo.PLUGIN_VERSION) return true;
 
 		// Match manifests in room, or skip rooms without manifests if you have any.
-		if (!sesh.Properties.ContainsKey("ArchEmperorManifest") || sesh.Properties["ArchEmperorManifest"] != LobbyCompatibilityRegistry.ComputeDigest()) return true;
-		// {
-		// 	Dictionary<string, string> onlineManifests = RuntimeData.GetOnlineManifests();
-		// 	string bundlesString = sesh.Properties["ArchEmperorModManifests"];
-		// 	string[] bundlesArray = bundlesString.Split(':');
-		// 	if (onlineManifests.Count != bundlesArray.Length) return true;
-
-		// 	// Match manifest versions
-		// 	foreach (var item in bundlesArray)
-		// 	{
-		// 		string[] keyValue = item[1..(item.Length - 1)].Split(',', System.StringSplitOptions.TrimEntries);
-
-		// 		Plugin.LogInfo($"Manifest received: {keyValue[0]} : {keyValue[1]}");
-
-		// 		if (!onlineManifests.ContainsKey(keyValue[0])) return true;
-		// 		if (onlineManifests[keyValue[0]] != keyValue[1]) return true;
-		// 	}
-		// }
-		// else if (RuntimeData.GetOnlineManifests().Count > 0) return true;
+		if (!sesh.Properties.ContainsKey("ArchEmperorManifest") || sesh.Properties["ArchEmperorManifest"] != ModRegistry.ComputeDigest()) return true;
 
 		return false;
 	}
@@ -194,7 +174,18 @@ public class OnlinePatch
 		// session.Properties["ArchEmperorManifest"];
 	}
 
+	// public static bool SendBundleInfo(NetworkManager __instance)
+	// {
+	// 	if (__instance.IsHostOrOffline())
+	// 	{
+	// 		return true;
+	// 	}
+	// 	return false;
+	// }
+
 	// WIP, technical challenge
+	// [HarmonyPrefix]
+	// [HarmonyPatch(typeof(NetworkManager), nameof(.RPC_))]
 	private static unsafe void RPC_SendBundleManifest()
 	{
 		if (NetworkManager.ins.IsHostOrOffline()) return;

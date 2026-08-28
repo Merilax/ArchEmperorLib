@@ -35,9 +35,10 @@ namespace ArchEmperorLib
 	/// <summary>Where a mod (or bundle) is required to be present.</summary>
 	public enum RequirementScope { Everyone, HostOnly, ClientOptional }
 
-	public readonly struct ModRecord(string id, string version, RequirementScope scope, VersionStrictness strictness)
+	public readonly struct ModRecord(string id, string name, string version, RequirementScope scope, VersionStrictness strictness)
 	{
 		public string Id { get; } = id;
+		public string Name { get; } = name;
 		public string Version { get; } = version;
 		public RequirementScope Scope { get; } = scope;
 		public VersionStrictness Strictness { get; } = strictness;
@@ -50,7 +51,7 @@ namespace ArchEmperorLib
 		public string Version { get; } = version;
 	}
 
-	public static class LobbyCompatibilityRegistry
+	public static class ModRegistry
 	{
 		private static readonly Dictionary<string, ModRecord> _records = new();
 		private static readonly Dictionary<string, Func<IReadOnlyList<BundleRecord>>> _bundleProviders = new();
@@ -58,13 +59,14 @@ namespace ArchEmperorLib
 
 		public static void Register(
 			string id,
+			string name,
 			string version,
 			RequirementScope scope = RequirementScope.Everyone,
 			VersionStrictness strictness = VersionStrictness.Exact,
 			// ICustomCompatibilityCheck customCheck = null,
 			Func<IReadOnlyList<BundleRecord>> bundles = null)
 		{
-			_records[id] = new ModRecord(id, version, scope, strictness);
+			_records[id] = new ModRecord(id, name, version, scope, strictness);
 
 			// if (customCheck != null) _customChecks[id] = customCheck; TODO
 			if (bundles != null) _bundleProviders[id] = bundles;
@@ -72,8 +74,15 @@ namespace ArchEmperorLib
 
 		public static IReadOnlyCollection<ModRecord> LocalMods => _records.Values;
 
+		public static Func<IReadOnlyList<BundleRecord>> GetBundles(string id)
+		{
+			if (_bundleProviders.ContainsKey(id))
+				return _bundleProviders[id];
+			return null;
+		}
+
 		// Quickly compute a hash of the local mod and bundle set.
-		public static string ComputeDigest()
+		public static string ComputeDigest(bool doNotHash = false)
 		{
 			// Add the basic data of each mod.
 			var parts = new List<string>();
@@ -90,11 +99,12 @@ namespace ArchEmperorLib
 					// If the mod has any bundles, add all of them, as they are obligatory.
 					foreach (var bundleRec in provider().OrderBy(b => b.Name, StringComparer.Ordinal))
 					{
-						parts.Add($" {modRec.Id}/{bundleRec.Name}@{bundleRec.Version}");
-						Plugin.LogDebug($" {modRec.Id}/{bundleRec.Name}@{bundleRec.Version}");
+						parts.Add($">{modRec.Id}/{bundleRec.Name}@{bundleRec.Version}");
+						Plugin.LogDebug($">{modRec.Id}/{bundleRec.Name}@{bundleRec.Version}");
 					}
 				}
 			}
+			if (doNotHash) return string.Join("|", parts);
 			using var sha = SHA256.Create();
 			var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("|", parts)));
 

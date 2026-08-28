@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>ArchEmperorLib</AssemblyName>
@@ -24,6 +23,9 @@
     <Reference Include="Assembly-CSharp-FirstPass">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Break Arts III\BepInEx\interop\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>..\lib\Public\Il2Cppmscorlib.dll</HintPath>
+    </Reference>
     <Reference Include="CoreModule">
       <HintPath>..\lib\Public\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
@@ -33,9 +35,9 @@
     <Reference Include="UnityEngineUI">
       <HintPath>..\lib\Public\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="Steamworks">
+    <!-- <Reference Include="Steamworks">
       <HintPath>..\lib\Public\com.rlabrecque.steamworks.net.dll</HintPath>
-    </Reference>
+    </Reference> -->
     <Reference Include="FusionRealtime">
       <HintPath>..\lib\Public\Fusion.Realtime.dll</HintPath>
     </Reference>
@@ -54,20 +56,23 @@
     <Reference Include="InputSystem">
       <HintPath>..\lib\Public\Unity.InputSystem.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEnginePhysics">
+    <!-- <Reference Include="UnityEnginePhysics">
       <HintPath>..\lib\Public\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
+    </Reference> -->
     <Reference Include="UnityEngineUIModule">
       <HintPath>..\lib\Public\UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngineJSONSerialize">
       <HintPath>..\lib\Public\UnityEngine.JSONSerializeModule.dll</HintPath>
     </Reference>
-    <Reference Include="Il2Cppmscorlib">
-      <HintPath>..\lib\Public\Il2Cppmscorlib.dll</HintPath>
+    <Reference Include="UnityTextRendering">
+      <HintPath>..\lib\PUBLIC\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="TextMeshProUGUI">
       <HintPath>..\lib\Public\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityLocalization">
+      <HintPath>..\lib\Public\Unity.Localization.dll</HintPath>
     </Reference>
     <Reference Include="UnityAddressables">
       <HintPath>..\lib\Public\Unity.Addressables.dll</HintPath>
