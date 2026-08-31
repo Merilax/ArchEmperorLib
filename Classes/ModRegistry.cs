@@ -53,10 +53,12 @@ namespace ArchEmperorLib
 
 	public static class ModRegistry
 	{
+		private static bool vanillaCompatible = true;
 		private static readonly Dictionary<string, ModRecord> _records = new();
 		private static readonly Dictionary<string, Func<IReadOnlyList<BundleRecord>>> _bundleProviders = new();
 		// private static readonly Dictionary<string, ICustomCompatibilityCheck> _customChecks = new();
 
+		public static bool IsVanillaCompatible() => vanillaCompatible;
 		public static void Register(
 			string id,
 			string name,
@@ -67,6 +69,7 @@ namespace ArchEmperorLib
 			Func<IReadOnlyList<BundleRecord>> bundles = null)
 		{
 			_records[id] = new ModRecord(id, name, version, scope, strictness);
+			if (scope == RequirementScope.HostOnly || scope == RequirementScope.Everyone) vanillaCompatible = false;
 
 			// if (customCheck != null) _customChecks[id] = customCheck; TODO
 			if (bundles != null) _bundleProviders[id] = bundles;
