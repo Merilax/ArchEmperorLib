@@ -4,6 +4,7 @@ using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 namespace ArchEmperorLib.UI
@@ -92,6 +93,12 @@ namespace ArchEmperorLib.UI
 		public static void InitializeGame()
 		{
 			Config.Debug_OfflineLeaderBoards = false;
+
+			Localization.FontSwitcher.Init();
+			
+			Cursor.lockState = CursorLockMode.Confined;
+			
+			LocalizationSettings.add_SelectedLocaleChanged((Il2CppSystem.Action<UnityEngine.Localization.Locale>)((locale) => Localization.SetLocale(locale)));
 		}
 
 		[HarmonyPostfix]
@@ -101,8 +108,6 @@ namespace ArchEmperorLib.UI
 			TextMeshProUGUI sampledText = __instance.MainMenuRoot.transform.Find("StartMenu").GetChild(1).GetChild(0).GetChild(0).GetComponent<TextMeshProUGUI>();
 			UIUtils.Fonts.mainFont = sampledText.font;
 			UIUtils.Fonts.mainFontMat = sampledText.fontSharedMaterial;
-
-			Cursor.lockState = CursorLockMode.Confined;
 
 			ModManager.Initialize();
 

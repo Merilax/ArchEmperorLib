@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Localization.Components;
-using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -83,6 +81,7 @@ public class ModManager : MonoBehaviour
 
 		creditsObject.transform.SetParent(modCreditsContainer.transform);
 		creditsObject.active = false;
+		Utils.RescaleUI(creditsObject);
 
 		modWindows.TryGetValue(guid, out var windows);
 		windows.credits = creditsObject;
@@ -114,6 +113,7 @@ public class ModManager : MonoBehaviour
 
 		settingsObject.transform.SetParent(modSettingsContainer.transform);
 		settingsObject.active = false;
+		Utils.RescaleUI(settingsObject);
 
 		modWindows.TryGetValue(guid, out var windows);
 		windows.settings = settingsObject;
@@ -171,8 +171,8 @@ public class ModManager : MonoBehaviour
 		// EventManager.ins.inGamePause?.pauseUI.
 		mainCanvas.gameObject.active = true;
 
-		// GrabFocus();
-		// SelectMod();
+		GrabFocus();
+		SelectMod();
 	}
 	public static void CloseModScreen()
 	{
@@ -186,6 +186,10 @@ public class ModManager : MonoBehaviour
 	public static void RescaleUI()
 	{
 		Utils.RescaleUI(mainCanvas?.gameObject);
+		// for (int i = 0; i < modEntriesContainer.transform.childCount; i++)
+		// {
+		// 	Utils.RescaleUI(modEntriesContainer.transform.GetChild(i).gameObject);
+		// }
 	}
 	#endregion
 
@@ -220,7 +224,7 @@ public class ModManager : MonoBehaviour
 		newPauseButton.GetComponent<Button>().onClick.RemoveAllListeners();
 		newPauseButton.GetComponent<Button>().onClick.m_PersistentCalls.Clear();
 		newPauseButton.GetComponent<Button>().onClick.AddListener((Action)(() => OpenModScreen()));
-		newPauseButton.transform.GetChild(0).GetComponent<LocalizeStringEvent>().enabled = false; 
+		newPauseButton.transform.GetChild(0).GetComponent<LocalizeStringEvent>().enabled = false;
 		newPauseButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Mod Settings";
 		newPauseButton.transform.SetParent(pauseMenu.transform);
 		newPauseButton.transform.SetSiblingIndex(2);
@@ -232,6 +236,7 @@ public class ModManager : MonoBehaviour
 		entryButton.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = version;
 		entryButton.transform.SetParent(modEntriesContainer.transform);
 		entryButton.GetComponent<Button>().onClick.AddListener((Action)(() => SelectMod(guid)));
+		Utils.RescaleUI(entryButton);
 		return entryButton.GetComponent<Button>();
 	}
 	#endregion

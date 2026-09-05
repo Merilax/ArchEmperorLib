@@ -84,9 +84,10 @@ public class ModSettingsManager
 						var value = row.transform.Find("Value").GetComponent<TextMeshProUGUI>();
 						var leftBtn = row.transform.Find("Left").GetComponent<Button>();
 						var rightBtn = row.transform.Find("Right").GetComponent<Button>();
-						Localization.OnLocaleChanged += () => { title?.text = Localization.GetText(guid, item.Value.titleKey); };
+						Localization.OnLocaleChanged += (lang) => { title?.text = Localization.GetText(guid, item.Value.titleKey); };
 						title.text = Localization.GetText(guid, item.Value.titleKey);
-						
+						Localization.FontSwitcher.HookText(title);
+
 						item.Value.cycleConfigEntry.SetTextMesh(value);
 						leftBtn.onClick.AddListener((System.Action)(() => { item.Value.cycleConfigEntry.OnLeftButton(); }));
 						rightBtn.onClick.AddListener((System.Action)(() => { item.Value.cycleConfigEntry.OnRightButton(); }));
@@ -125,7 +126,8 @@ public class CycleConfigEntry<T>
 		if (_pendingValue is Enum)
 		{
 			_text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]);
-			Localization.OnLocaleChanged += () => { _text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]); };
+			Localization.OnLocaleChanged += (lang) => { _text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]); };
+			Localization.FontSwitcher.HookText(_text);
 		}
 	}
 
@@ -142,7 +144,8 @@ public class CycleConfigEntry<T>
 	{
 		_text = mesh;
 		_text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]);
-		Localization.OnLocaleChanged += () => { _text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]); };
+		Localization.OnLocaleChanged += (lang) => { _text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]); };
+		Localization.FontSwitcher.HookText(_text);
 	}
 	public void OnLeftButton()
 	{
