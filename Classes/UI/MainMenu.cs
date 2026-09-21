@@ -11,6 +11,7 @@ namespace ArchEmperorLib.UI
 {
 	public class MainMenuPatch
 	{
+		private static bool hasInit = false;
 		private static class TranslationKeys { public const string OFF = "OFF", ON = "ON", LOW = "LOW", MEDIUM = "MEDIUM", HIGH = "HIGH", RACE_ONLY = "RACE_ONLY", DIORAMA_ONLY = "DIORAMA_ONLY", NONE = "NONE", REDUCED = "REDUCED", FULL = "FULL", DEFAULT = "DEFAULT"; };
 		private static readonly Dictionary<Localization.Locales, Dictionary<string, string>> translations = new()
 		{
@@ -95,9 +96,9 @@ namespace ArchEmperorLib.UI
 			Config.Debug_OfflineLeaderBoards = false;
 
 			Localization.FontSwitcher.Init();
-			
+
 			Cursor.lockState = CursorLockMode.Confined;
-			
+
 			LocalizationSettings.add_SelectedLocaleChanged((Il2CppSystem.Action<UnityEngine.Localization.Locale>)((locale) => Localization.SetLocale(locale)));
 		}
 
@@ -109,17 +110,21 @@ namespace ArchEmperorLib.UI
 			UIUtils.Fonts.mainFont = sampledText.font;
 			UIUtils.Fonts.mainFontMat = sampledText.fontSharedMaterial;
 
-			ModManager.Initialize();
+			if (!hasInit)
+			{
+				ModManager.Initialize();
 
-			GameObject creditBlock = GameObject.Instantiate(Plugin.assets.LoadAsset<GameObject>("ArchEmperorCredits"));
-			ModManager.SetCredits(MyPluginInfo.PLUGIN_GUID, creditBlock);
+				GameObject creditBlock = GameObject.Instantiate(Plugin.assets.LoadAsset<GameObject>("ArchEmperorCredits"));
+				ModManager.SetCredits(MyPluginInfo.PLUGIN_GUID, creditBlock);
 
-			Localization.AddTranslation(MyPluginInfo.PLUGIN_GUID, translations);
-			ModSettingsManager.AddTextRelations(MyPluginInfo.PLUGIN_GUID, settingRelations);
+				Localization.AddTranslation(MyPluginInfo.PLUGIN_GUID, translations);
+				ModSettingsManager.AddTextRelations(MyPluginInfo.PLUGIN_GUID, settingRelations);
+			}
 
 			AddModSignature(ref __instance);
 			AddModButton(ref __instance);
 
+			hasInit = true;
 			// Mod ready emit()
 		}
 

@@ -44,6 +44,8 @@ public class ModManager : MonoBehaviour
 
 	public static void Initialize()
 	{
+		if (ready) return;
+		
 		GameObject canvasObj = GameObject.Instantiate(Plugin.assets.LoadAsset<GameObject>("ModCanvas_MainMenu"));
 		if (!canvasObj) throw new Exception("Couldn't load MainMenu asset from bundle.");
 
