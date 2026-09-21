@@ -15,42 +15,45 @@ public class OnlinePatch
 	[HarmonyPatch(typeof(NetworkRunner), nameof(NetworkRunner.StartGame))]
 	public static void NetRunner_StartGame(NetworkRunner __instance, ref StartGameArgs args)
 	{
-		if (!ModRegistry.IsVanillaCompatible())
+		if (ModRegistry.IsVanillaCompatible())
 		{
-			if (args.SessionProperties != null)
-			{
-				if (args.SessionProperties.ContainsKey("ArchEmperorVersion"))
-				{
-					args.SessionProperties["ArchEmperorVersion"] = MyPluginInfo.PLUGIN_VERSION;
-					args.SessionProperties["ArchEmperorManifest"] = ModRegistry.ComputeDigest();//string.Join(':', RuntimeData.GetOnlineManifests());
-				}
-				else
-				{
-					args.SessionProperties.Add("ArchEmperorVersion", MyPluginInfo.PLUGIN_VERSION);
-					args.SessionProperties.Add("ArchEmperorManifest", ModRegistry.ComputeDigest());
-				}
-			}
-
-			FusionAppSettings fusionAppSettings = PhotonAppSettings.Global.AppSettings.GetCopy();
-			fusionAppSettings.UseNameServer = true;
-			fusionAppSettings.AppVersion = "ArchEmperor." + Application.version;
-
-			string region = MatchmakingUI.ins.GetCurrentRegion();
-			bool bVar1 = region.IsNullOrWhiteSpace();
-			if (!bVar1)
-			{
-				region = region.ToLower();
-				fusionAppSettings.FixedRegion = region;
-			}
-
-			args.CustomPhotonAppSettings = fusionAppSettings;
-
-			Plugin.LogDebug("Session Name: " + args.SessionName);
-			Plugin.LogDebug("Mod Version: " + args.CustomPhotonAppSettings.AppVersion);
-			//Plugin.LogDebug("Mod Manifests: " + string.Join(':', LobbyCompatibilityRegistry.BuildManifest())); //RuntimeData.GetOnlineManifests()));
-			if (args.SessionProperties != null) foreach (var prop in args.SessionProperties) Plugin.LogDebug($"PROP {prop.Key} : {prop.Value.ToString()}");
+			Plugin.LogInfo("No online required mods loaded, starting room in vanilla mode.");
+			return;
 		}
-		else Plugin.LogInfo("No online required mods loaded, starting room in vanilla mode.");
+
+		if (args.SessionProperties != null)
+		{
+			if (args.SessionProperties.ContainsKey("ArchEmperorVersion"))
+			{
+				args.SessionProperties["ArchEmperorVersion"] = MyPluginInfo.PLUGIN_VERSION;
+				args.SessionProperties["ArchEmperorManifest"] = ModRegistry.ComputeDigest();//string.Join(':', RuntimeData.GetOnlineManifests());
+			}
+			else
+			{
+				args.SessionProperties.Add("ArchEmperorVersion", MyPluginInfo.PLUGIN_VERSION);
+				args.SessionProperties.Add("ArchEmperorManifest", ModRegistry.ComputeDigest());
+			}
+		}
+
+		FusionAppSettings fusionAppSettings = PhotonAppSettings.Global.AppSettings.GetCopy();
+		fusionAppSettings.UseNameServer = true;
+		fusionAppSettings.AppVersion = "ArchEmperor." + Application.version;
+
+		string region = MatchmakingUI.ins.GetCurrentRegion();
+		bool bVar1 = region.IsNullOrWhiteSpace();
+		if (!bVar1)
+		{
+			region = region.ToLower();
+			fusionAppSettings.FixedRegion = region;
+		}
+
+		args.CustomPhotonAppSettings = fusionAppSettings;
+
+		Plugin.LogDebug("Session Name: " + args.SessionName);
+		Plugin.LogDebug("Mod Version: " + args.CustomPhotonAppSettings.AppVersion);
+		//Plugin.LogDebug("Mod Manifests: " + string.Join(':', LobbyCompatibilityRegistry.BuildManifest())); //RuntimeData.GetOnlineManifests()));
+		if (args.SessionProperties != null) foreach (var prop in args.SessionProperties) Plugin.LogDebug($"PROP {prop.Key} : {prop.Value.ToString()}");
+
 	}
 
 
@@ -73,7 +76,7 @@ public class OnlinePatch
 		FusionAppSets = FusionAppSets.GetCopy();
 
 		FusionAppSets.UseNameServer = true;
-		FusionAppSets.AppVersion = "ArchEmperor." + Application.version;
+		FusionAppSets.AppVersion = (!ModRegistry.IsVanillaCompatible() ? "ArchEmperor." : "") + Application.version;
 
 		string region = MatchmakingUI.ins.GetCurrentRegion();
 		bool bVar1 = region.IsNullOrWhiteSpace();
@@ -118,19 +121,16 @@ public class OnlinePatch
 	public static void NetManager_JoinLobby(NetworkManager._JoinLobby_d__41 __instance, ref bool __runOriginal)
 	{
 		// Plugin.LogInfo("B Pre-State: " + __instance.__1__state);
-		if (!ModRegistry.IsVanillaCompatible())
-		{
-			__runOriginal = false;
-			_ = NetRunner_JoinSessionLobby(__instance.__4__this);
-		}
+		__runOriginal = false;
+		_ = NetRunner_JoinSessionLobby(__instance.__4__this);
 	}
 
 	[HarmonyPrefix]
 	[HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.OnSessionListUpdated))]
 	public static void NetManager_OnSessionListUpdated(NetworkManager __instance, ref NetworkRunner runner, ref Il2CppSystem.Collections.Generic.List<SessionInfo> sessionList)
 	{
-		Plugin.LogDebug("OnSessionListUpdated:" + sessionList.Count);
 		if (ModRegistry.IsVanillaCompatible()) return;
+		Plugin.LogDebug("OnSessionListUpdated:" + sessionList.Count);
 		sessionList.RemoveAll((Il2CppSystem.Predicate<SessionInfo>)ValidateVersion);
 		Plugin.LogDebug("OnSessionListUpdated Filtered:" + sessionList.Count);
 	}
@@ -173,14 +173,7 @@ public class OnlinePatch
 
 		return false;
 	}
-
-	// [HarmonyPostfix]
-	// [HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager._JoinOnlineLobby_d__42.MoveNext))]
-	public static void NetworkManager_JoinOnlineSession(NetworkManager __instance, bool __result)
-	{
-		if (__result) return;
-		// session.Properties["ArchEmperorManifest"];
-	}
+	
 
 	// public static bool SendBundleInfo(NetworkManager __instance)
 	// {

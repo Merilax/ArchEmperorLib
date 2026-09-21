@@ -81,14 +81,7 @@ public class Localization
 			public TMP_FontAsset font;
 			public Material material;
 		}
-		// public readonly FontAssets assets = fontAssets;
-		private static Dictionary<Config.LanguageType, FontAsset> assets = new() {
-			{ Config.LanguageType.English, new() },
-			{ Config.LanguageType.Japanese, new() },
-			{ Config.LanguageType.Chinese_s, new() },
-			{ Config.LanguageType.Chinese_t, new() }
-			};
-
+		private static Dictionary<Config.LanguageType, FontAsset> assets = [];
 		private static bool hasInit = false;
 		public static void Init()
 		{

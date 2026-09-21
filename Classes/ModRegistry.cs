@@ -35,9 +35,9 @@ namespace ArchEmperorLib
 	/// <summary>Where a mod (or bundle) is required to be present.</summary>
 	public enum RequirementScope { Everyone, HostOnly, ClientOptional }
 
-	public readonly struct ModRecord(string id, string name, string version, RequirementScope scope, VersionStrictness strictness)
+	public readonly struct ModRecord(string guid, string name, string version, RequirementScope scope, VersionStrictness strictness)
 	{
-		public string Id { get; } = id;
+		public string Id { get; } = guid;
 		public string Name { get; } = name;
 		public string Version { get; } = version;
 		public RequirementScope Scope { get; } = scope;
@@ -60,7 +60,7 @@ namespace ArchEmperorLib
 
 		public static bool IsVanillaCompatible() => vanillaCompatible;
 		public static void Register(
-			string id,
+			string guid,
 			string name,
 			string version,
 			RequirementScope scope = RequirementScope.Everyone,
@@ -68,11 +68,11 @@ namespace ArchEmperorLib
 			// ICustomCompatibilityCheck customCheck = null,
 			Func<IReadOnlyList<BundleRecord>> bundles = null)
 		{
-			_records[id] = new ModRecord(id, name, version, scope, strictness);
-			if (scope == RequirementScope.HostOnly || scope == RequirementScope.Everyone) vanillaCompatible = false;
+			_records[guid] = new ModRecord(guid, name, version, scope, strictness);
+			if (guid != MyPluginInfo.PLUGIN_GUID && (scope == RequirementScope.HostOnly || scope == RequirementScope.Everyone)) vanillaCompatible = false;
 
 			// if (customCheck != null) _customChecks[id] = customCheck; TODO
-			if (bundles != null) _bundleProviders[id] = bundles;
+			if (bundles != null) _bundleProviders[guid] = bundles;
 		}
 
 		public static IReadOnlyCollection<ModRecord> LocalMods => _records.Values;
