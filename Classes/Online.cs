@@ -5,6 +5,7 @@ using DG.Tweening;
 using Fusion;
 using Fusion.Photon.Realtime;
 using HarmonyLib;
+using Il2CppSystem.IO;
 using UnityEngine;
 
 namespace ArchEmperorLib;
@@ -173,7 +174,37 @@ public class OnlinePatch
 
 		return false;
 	}
-	
+
+
+	// The following three functions enable solo multiplayer.
+	private static bool hijackPlayerCount = false;
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.CheckAllPlayerReady))]
+	public static void NetworkManager_CheckAllPlayerReady(bool __result)
+	{
+		hijackPlayerCount = true;
+	}
+
+	[HarmonyPostfix]
+	[HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.GetPlayerCount))]
+	public static void NetworkManager_GetPlayerCount(ref int __result)
+	{
+		if (hijackPlayerCount && __result == 1) __result = 2;
+		hijackPlayerCount = false;
+	}
+
+	[HarmonyPrefix]
+	[HarmonyPatch(typeof(NetworkManager), nameof(NetworkManager.OnlineMatch_ToggleReady))]
+	public static void OnlineMatch_ToggleReady(NetworkManager __instance, ref bool __runOriginal)
+	{
+		if (__instance.networkRunner.ActivePlayers.ToArray().Count != 1) return;
+		__runOriginal = false;
+
+		__instance.mySync.SetReady(!__instance.mySync.IsReadyToGameStart);
+		MatchmakingUI.ins.IS_SetActiveUnreadyButtons(__instance.mySync.IsReadyToGameStart);
+		AuMa.ins.PlaySE2D(0);
+		return;
+	}
 
 	// public static bool SendBundleInfo(NetworkManager __instance)
 	// {
