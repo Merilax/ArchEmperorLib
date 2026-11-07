@@ -89,6 +89,7 @@ public class ModSettingsManager
 						Localization.FontSwitcher.HookText(title);
 
 						item.Value.cycleConfigEntry.SetTextMesh(value);
+						item.Value.cycleConfigEntry.UIInputs = new List<Button>([leftBtn, rightBtn]);
 						leftBtn.onClick.AddListener((System.Action)(() => { item.Value.cycleConfigEntry.OnLeftButton(); }));
 						rightBtn.onClick.AddListener((System.Action)(() => { item.Value.cycleConfigEntry.OnRightButton(); }));
 
@@ -115,6 +116,9 @@ public class CycleConfigEntry<T>
 	private T _pendingValue;
 	public T Pending => _pendingValue;
 	public T Value => _configEntry.Value;
+	public List<Button> UIInputs = [];
+	public delegate void PendingValueChanged();
+	public event PendingValueChanged OnPendingValueChanged;
 
 	public CycleConfigEntry(string translationGUID, ConfigEntry<T> configEntry, IReadOnlyList<T> options, TextMeshProUGUI textMesh = null)
 	{
@@ -140,6 +144,12 @@ public class CycleConfigEntry<T>
 		}
 		return 0;
 	}
+	public void SetPendingValue(T value)
+	{
+		_pendingValue = value;
+		if (_pendingValue is Enum)
+			_text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]);
+	}
 	public void SetTextMesh(TextMeshProUGUI mesh)
 	{
 		_text = mesh;
@@ -153,6 +163,7 @@ public class CycleConfigEntry<T>
 		_pendingValue = _options[prev];
 		if (_pendingValue is Enum)
 			_text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]);
+		OnPendingValueChanged?.Invoke();
 	}
 	public void OnRightButton()
 	{
@@ -160,6 +171,7 @@ public class CycleConfigEntry<T>
 		_pendingValue = _options[next];
 		if (_pendingValue is Enum)
 			_text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]);
+		OnPendingValueChanged?.Invoke();
 	}
 	public void Confirm()
 	{
@@ -171,6 +183,13 @@ public class CycleConfigEntry<T>
 		if (_pendingValue is Enum)
 		{
 			_text?.text = Localization.GetText(_translationGUID, ModSettingsManager.valueTextRelations[_translationGUID][_pendingValue as Enum]);
+		}
+	}
+	public void Disable(bool disable)
+	{
+		foreach (var item in UIInputs)
+		{
+			item.interactable = !disable;
 		}
 	}
 }
