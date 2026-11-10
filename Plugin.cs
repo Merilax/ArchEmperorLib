@@ -32,6 +32,7 @@ public class Plugin : BasePlugin
 
 		var harmony = Harmony.CreateAndPatchAll(typeof(OnlinePatch));
 		harmony.PatchAll(typeof(MainMenuPatch));
+		harmony.PatchAll(typeof(GeoramaPatch));
 
 		IL2CPPChainloader.AddUnityComponent<ModManager>();
 
